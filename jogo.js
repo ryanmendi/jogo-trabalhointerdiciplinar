@@ -1,5 +1,7 @@
 console.log('Flappy Bird');
 
+let frames = 0;
+
 const Som_HIT = new Audio();
 Som_HIT.src = './Efeitos/efeitos_hit.wav';
 
@@ -40,7 +42,42 @@ const planoDeFundo = {
         );
     },
 };
-// [Chao]
+
+function CriaChao() {
+    const chao = {
+        spriteX: 0,
+        spriteY: 610,
+        largura: 224,
+        altura: 112,
+        x: 0,
+        y: canvas.height - 112,
+        atualiza() {
+            const MovimentoDoChao = 1;
+            const RepeteEm = chao.largura / 2;
+            const movimentacao = chao.x - MovimentoDoChao;
+            chao.x = movimentacao % RepeteEm
+
+        },
+        desenha() {
+            contexto.drawImage(
+                sprites,
+                chao.spriteX, chao.spriteY,
+                chao.largura, chao.altura,
+                chao.x, chao.y,
+                chao.largura, chao.altura,
+            );
+            contexto.drawImage(
+                sprites,
+                chao.spriteX, chao.spriteY,
+                chao.largura, chao.altura,
+                (chao.x + chao.largura), chao.y,
+                chao.largura, chao.altura,
+            );
+        },
+    };
+    return chao;
+}
+//Chao
 const chao = {
     spriteX: 0,
     spriteY: 610,
@@ -92,23 +129,44 @@ function CriaFlappyBird() {
         gravidade: 0.25,
         velocidade: 0,
         atualiza() {
-            if (fazcolisao(flappyBird, chao)) {
-                console.log('faz colosão');
+            if (fazcolisao(flappyBird, Globais.chao)) {
+                console.log('faz colisão');
                 Som_HIT.play();
-                setTimeout(() =>{
+                setTimeout(() => {
                     mudaParaTela(Telas.INICIO);
-                },500);
-              
+                }, 500);
+
                 return;
             }
 
             flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade;
             flappyBird.y = flappyBird.y + flappyBird.velocidade;
         },
+        movimentos: [
+            { spriteX: 0, spriteY: 0, }, //frame asa cima 
+            { spriteX: 0, spriteY: 26, }, // frame asa meio
+            { spriteX: 0, spriteY: 52, }, // frame asa baixo 
+        ],
+        FrameAtual: 0,
+        AtualizaFrameAtual() {
+            const IntervaloDeFrames = 10; 
+            const PassouOIntervalo = frames % IntervaloDeFrames === 0;
+            if (PassouOIntervalo) {
+                const BaseDoIncremento = 1;
+                const Incremento = BaseDoIncremento + flappyBird.FrameAtual;
+                const BaseRepeticao = flappyBird.movimentos.length;
+                flappyBird.FrameAtual = Incremento % BaseRepeticao;
+            }
+           
+        },
+
         desenha() {
+            flappyBird.AtualizaFrameAtual();
+            const { spriteX, spriteY } = flappyBird.movimentos[flappyBird.FrameAtual];
+
             contexto.drawImage(
                 sprites,
-                flappyBird.spriteX, flappyBird.spriteY, // Sprite X, Sprite Y
+                spriteX, spriteY, // Sprite X, Sprite Y
                 flappyBird.largura, flappyBird.altura, // Tamanho do recorte na sprite
                 flappyBird.x, flappyBird.y,
                 flappyBird.largura, flappyBird.altura,
@@ -190,10 +248,11 @@ const Telas = {
     INICIO: {
         inicializa() {
             Globais.flappyBird = CriaFlappyBird();
+            Globais.chao = CriaChao();
         },
         desenha() {
             planoDeFundo.desenha();
-            chao.desenha();
+            Globais.chao.desenha();
             Globais.flappyBird.desenha();
             mensagemGetReady.desenha();
         },
@@ -201,7 +260,7 @@ const Telas = {
             mudaParaTela(Telas.JOGO);
         },
         atualiza() {
-
+            Globais.chao.atualiza();
         }
     }
 };
@@ -209,7 +268,7 @@ const Telas = {
 Telas.JOGO = {
     desenha() {
         planoDeFundo.desenha();
-        chao.desenha();
+        Globais.chao.desenha();
         Globais.flappyBird.desenha();
     },
     click() {
@@ -226,6 +285,7 @@ function loop() {
     telaAtiva.desenha();
     telaAtiva.atualiza();
 
+    frames = frames + 1;
     requestAnimationFrame(loop);
 }
 
