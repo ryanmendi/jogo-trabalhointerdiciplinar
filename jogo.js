@@ -319,6 +319,14 @@ function CriaPlacar() {
 }
 
 
+window.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') { // Verifica se a tecla pressionada é a barra de espaço
+        if (telaAtiva.click) {
+            telaAtiva.click(); // Aplica a ação no click 
+        }
+    }
+});
+
 // Telas
 const Globais = {};
 let telaAtiva = {};
