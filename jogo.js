@@ -94,15 +94,15 @@ function CriaFlappyBird() {
         spriteX: 0,
         spriteY: 0,
         largura: 33,
-        altura: 24,
+        altura: 26,
         x: 10,
         y: 50,
-        pulo: 4.6,
+        pulo: 4.5,
         pula() {
             console.log('devo pular');
             flappyBird.velocidade = - flappyBird.pulo
         },
-        gravidade: 0.25,
+        gravidade: 0.23,
         velocidade: 0,
         atualiza() {
             if (fazcolisao(flappyBird, Globais.chao)) {
